@@ -1,0 +1,53 @@
+<%- include("../partials/header") %>
+
+<div class="max-w-4xl mx-auto mt-12 px-4">
+
+  <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+
+    <% if(property.image){ %>
+      <img src="/uploads/<%= property.image %>" class="w-full h-80 object-cover">
+    <% } else { %>
+      <div class="w-full h-80 bg-gray-200 flex items-center justify-center text-gray-500">
+        No Image Available
+      </div>
+    <% } %>
+
+    <div class="p-6">
+
+      <h1 class="text-3xl font-bold text-gray-800"><%= property.title %></h1>
+
+      <p class="text-gray-500 mt-2">📍 <%= property.location %></p>
+
+      <p class="text-blue-600 text-2xl font-bold mt-4">₹ <%= property.price %> / month</p>
+
+      <p class="text-gray-700 mt-4"><%= property.description || "No description provided." %></p>
+
+      <p class="text-sm text-gray-400 mt-4">Added on <%= property.createdAt.toDateString() %></p>
+
+      <div class="mt-6 flex gap-4">
+
+        <a href="/properties" class="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800">
+          Back
+        </a>
+
+        <% if(user && user.role === "tenant" && (!property.owner || property.owner._id.toString() !== user._id.toString())) { %>
+          <form action="/api/bookings/<%= property._id %>" method="POST">
+            <button class="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700">
+              Book Property
+            </button>
+          </form>
+        <% } else if (!user) { %>
+          <a href="/login" class="bg-red-500 text-white px-5 py-2 rounded hover:bg-red-600">
+            Login to Book
+          </a>
+        <% } %>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<%- include("../partials/footer") %>

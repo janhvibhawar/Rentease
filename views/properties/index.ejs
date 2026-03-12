@@ -1,0 +1,125 @@
+<%- include("../partials/header") %>
+
+<div class="container mx-auto mt-12 px-4">
+
+  <h2 class="text-3xl font-bold mb-6 text-gray-800 text-center">
+    Available Properties
+  </h2>
+
+  <!-- Search -->
+  <div class="max-w-md mx-auto mb-8">
+    <form action="/properties/search" method="GET" class="flex">
+      <input
+        type="text"
+        name="location"
+        placeholder="Search by location..."
+        class="w-full border px-3 py-2 rounded-l focus:outline-none focus:ring-2 focus:ring-blue-400"
+      />
+      <button type="submit" class="bg-blue-600 text-white px-4 rounded-r hover:bg-blue-700">
+        Search
+      </button>
+    </form>
+  </div>
+
+  <% if (!properties || properties.length === 0) { %>
+    <p class="text-gray-600 text-center">No properties available yet.</p>
+  <% } else { %>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+
+      <% properties.forEach(property => { %>
+
+        <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition duration-300 overflow-hidden">
+
+          <% if (property.image) { %>
+            <img src="/uploads/<%= property.image %>" class="w-full h-52 object-cover">
+          <% } else { %>
+            <div class="w-full h-52 bg-gray-200 flex items-center justify-center text-gray-500">
+              No Image
+            </div>
+          <% } %>
+
+          <div class="p-5">
+
+            <h3 class="text-xl font-semibold text-gray-800">
+              <%= property.title %>
+            </h3>
+
+            <p class="text-gray-500 mt-1">
+              📍 <%= property.location %>
+            </p>
+
+            <p class="text-blue-600 font-bold text-lg mt-3">
+              ₹ <%= property.price %>
+            </p>
+
+            <!-- Owner Contact -->
+            <p class="text-gray-700 mt-2">
+              📞 Owner Contact: <%= property.ownerContact %>
+            </p>
+
+            <!-- Status -->
+            <p class="mt-2 text-sm">
+              Status:
+              <% if(property.status === "available"){ %>
+                <span class="text-green-600 font-semibold">Available</span>
+              <% } else { %>
+                <span class="text-red-600 font-semibold">Booked</span>
+              <% } %>
+            </p>
+
+            <p class="text-sm text-gray-400 mt-2">
+              Added on <%= property.createdAt.toDateString() %>
+            </p>
+
+            <!-- Buttons -->
+            <div class="mt-4 flex gap-3 flex-wrap">
+
+              <!-- View -->
+              <a href="/properties/<%= property._id %>"
+                 class="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-900">
+                 View
+              </a>
+
+              <!-- Tenant Book Button -->
+              <% if (user && user.role === "tenant" && property.status === "available" && (!property.owner || property.owner._id.toString() !== user._id.toString())) { %>
+                <form action="/api/bookings/<%= property._id %>" method="POST">
+                  <button type="submit"
+                    class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                    Book Now
+                  </button>
+                </form>
+              <% } %>
+
+              <!-- Owner Controls -->
+              <% if (user && property.owner && property.owner._id.toString() === user._id.toString()) { %>
+
+                <a href="/properties/edit/<%= property._id %>"
+                   class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+                  Edit
+                </a>
+
+                <form action="/api/properties/delete/<%= property._id %>" method="POST">
+                  <button type="submit"
+                    class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                    Delete
+                  </button>
+                </form>
+
+              <% } %>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      <% }) %>
+
+    </div>
+
+  <% } %>
+
+</div>
+
+<%- include("../partials/footer") %>

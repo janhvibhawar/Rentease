@@ -1,0 +1,102 @@
+<%- include("partials/header") %>
+
+<div class="container mx-auto mt-12 px-4">
+
+  <!-- Success Message -->
+  <% if(success){ %>
+  <div class="bg-green-100 text-green-800 p-4 rounded mb-6 text-center">
+    ✅ Booking successful!
+  </div>
+  <% } %>
+
+  <!-- =====================
+       TENANT DASHBOARD
+       ===================== -->
+  <% if(user.role === "tenant"){ %>
+
+    <h2 class="text-3xl font-bold text-center mb-8">My Bookings</h2>
+
+    <% if(!bookings || bookings.length === 0){ %>
+      <p class="text-center text-gray-500">You haven't booked any properties yet.</p>
+    <% } else { %>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% bookings.forEach(booking => { %>
+          <div class="bg-white rounded-lg shadow p-4">
+            <% if(booking.property && booking.property.image){ %>
+              <img src="/uploads/<%= booking.property.image %>" class="w-full h-40 object-cover rounded">
+            <% } else { %>
+              <div class="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-500 rounded mb-2">No Image</div>
+            <% } %>
+            <h3 class="text-xl font-bold mt-2"><%= booking.property?.title || "No Title" %></h3>
+            <p class="text-gray-500">📍 <%= booking.property?.location || "No Location" %></p>
+            <p class="text-blue-600 font-bold">₹ <%= booking.property?.price || "N/A" %></p>
+            <p class="text-sm text-gray-500 mt-2">Owner: <%= booking.property?.owner?.name || "Unknown" %></p>
+            <p class="text-sm mt-2">Status: <span class="font-bold text-yellow-600"><%= booking.status || "Pending" %></span></p>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+
+  <% } %>
+
+  <!-- =====================
+       OWNER DASHBOARD
+       ===================== -->
+  <% if(user.role === "owner"){ %>
+
+    <h2 class="text-3xl font-bold text-center mb-6">My Properties</h2>
+
+    <% if(!properties || properties.length === 0){ %>
+      <p class="text-center text-gray-500">You haven't added any properties yet.</p>
+    <% } else { %>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        <% properties.forEach(property => { %>
+          <div class="bg-white rounded-lg shadow p-4">
+            <% if(property.image){ %>
+              <img src="/uploads/<%= property.image %>" class="w-full h-40 object-cover rounded">
+            <% } else { %>
+              <div class="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-500 rounded mb-2">No Image</div>
+            <% } %>
+            <h3 class="text-xl font-bold mt-2"><%= property.title %></h3>
+            <p class="text-gray-500">📍 <%= property.location %></p>
+            <p class="text-blue-600 font-bold">₹ <%= property.price %></p>
+            <div class="mt-2 flex space-x-2">
+              <a href="/properties/edit/<%= property._id %>" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">Edit</a>
+              <form action="/api/properties/delete/<%= property._id %>" method="POST" class="inline">
+                <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Delete</button>
+              </form>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+
+    <h2 class="text-3xl font-bold text-center mb-6">Bookings for My Properties</h2>
+
+    <% if(!bookings || bookings.length === 0){ %>
+      <p class="text-center text-gray-500">No bookings yet.</p>
+    <% } else { %>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% bookings.forEach(booking => { %>
+          <div class="bg-white rounded-lg shadow p-4">
+            <h3 class="text-xl font-bold"><%= booking.property.title %></h3>
+            <p class="text-gray-500">Tenant: <%= booking.tenant.name %></p>
+            <p class="text-blue-600 font-bold">₹ <%= booking.property.price %></p>
+            <p class="text-sm mt-2">Status: <span class="font-bold <%= booking.status === 'confirmed' ? 'text-green-600' : booking.status === 'cancelled' ? 'text-red-600' : 'text-yellow-600' %>"><%= booking.status %></span></p>
+            <% if(booking.status === 'pending'){ %>
+              <form action="/api/bookings/update/status" method="POST" class="mt-2 flex space-x-2">
+                <input type="hidden" name="bookingId" value="<%= booking._id %>">
+                <button type="submit" name="status" value="confirmed" class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">Confirm</button>
+                <button type="submit" name="status" value="cancelled" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Cancel</button>
+              </form>
+            <% } %>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+
+  <% } %>
+
+</div>
+
+<%- include("partials/footer") %>
